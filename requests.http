@@ -1,0 +1,43 @@
+@baseUrl = http://localhost:3000
+@customerId = cust_1
+
+### Health
+GET {{baseUrl}}/health
+
+### List products
+GET {{baseUrl}}/products
+
+### Add cart item
+POST {{baseUrl}}/customers/{{customerId}}/cart/items
+Content-Type: application/json
+
+{
+  "productId": "prod_1",
+  "quantity": 2
+}
+
+### View cart
+GET {{baseUrl}}/customers/{{customerId}}/cart
+
+### Checkout without coupon
+POST {{baseUrl}}/customers/{{customerId}}/checkout
+Content-Type: application/json
+
+{}
+
+### Generate discount code (after NTH_ORDER checkouts)
+POST {{baseUrl}}/admin/discount-codes/generate
+Content-Type: application/json
+
+{}
+
+### Checkout with discount code
+POST {{baseUrl}}/customers/{{customerId}}/checkout
+Content-Type: application/json
+
+{
+  "discountCode": "SAVE10-REPLACE_ME"
+}
+
+### Admin stats
+GET {{baseUrl}}/admin/stats
