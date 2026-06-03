@@ -1,8 +1,13 @@
 import type { FastifyInstance } from "fastify";
-import { discountCodeSchema } from "../schemas/admin.schema.js";
+import { adminStatsSchema, discountCodeSchema } from "../schemas/admin.schema.js";
 import type { DiscountService } from "../services/discount.service.js";
+import type { StatsService } from "../services/stats.service.js";
 
-export function registerAdminDiscountRoutes(app: FastifyInstance, discountService: DiscountService): void {
+export function registerAdminRoutes(
+  app: FastifyInstance,
+  discountService: DiscountService,
+  statsService: StatsService,
+): void {
   app.post(
     "/admin/discount-codes/generate",
     {
@@ -18,5 +23,15 @@ export function registerAdminDiscountRoutes(app: FastifyInstance, discountServic
       const discountCode = discountService.generateDiscountCode();
       return reply.status(201).send(discountCode);
     },
+  );
+
+  app.get(
+    "/admin/stats",
+    {
+      schema: {
+        response: { 200: adminStatsSchema },
+      },
+    },
+    async () => statsService.getStats(),
   );
 }
