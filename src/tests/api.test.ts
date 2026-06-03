@@ -67,4 +67,52 @@ describe("HTTP API", () => {
 
     await app.close();
   });
+
+  it("rejects invalid cart quantity at HTTP boundary", async () => {
+    const app = buildApp({ store: createStore() });
+    await app.ready();
+
+    const zeroQuantity = await app.inject({
+      method: "POST",
+      url: "/customers/cust_1/cart/items",
+      payload: { productId: "prod_1", quantity: 0 },
+    });
+    expect(zeroQuantity.statusCode).toBe(400);
+    expect(zeroQuantity.json()).toMatchObject({
+      error: expect.any(String),
+      code: "INVALID_REQUEST",
+    });
+
+    const decimalQuantity = await app.inject({
+      method: "POST",
+      url: "/customers/cust_1/cart/items",
+      payload: { productId: "prod_1", quantity: 1.5 },
+    });
+    expect(decimalQuantity.statusCode).toBe(400);
+    expect(decimalQuantity.json()).toMatchObject({
+      error: expect.any(String),
+      code: "INVALID_REQUEST",
+    });
+
+    await app.close();
+  });
+
+  it("rejects discount generation before milestone is reached", async () => {
+    const app = buildApp({ store: createStore() });
+    await app.ready();
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/admin/discount-codes/generate",
+      payload: {},
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({
+      error: expect.any(String),
+      code: "MILESTONE_NOT_ELIGIBLE",
+    });
+
+    await app.close();
+  });
 });

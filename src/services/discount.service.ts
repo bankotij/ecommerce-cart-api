@@ -40,14 +40,6 @@ export class DiscountService {
       );
     }
 
-    if (this.store.hasIssuedMilestone(milestone)) {
-      throw new AppError(
-        409,
-        ErrorCodes.MILESTONE_ALREADY_ISSUED,
-        `Discount code already issued for milestone order ${milestone}`,
-      );
-    }
-
     const discountCode: DiscountCode = {
       code: generateCodeString(config.discountPercent),
       percentOff: config.discountPercent,

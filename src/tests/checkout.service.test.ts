@@ -15,7 +15,7 @@ function createCheckoutStack() {
 
 describe("CheckoutService", () => {
   it("rejects checkout for empty cart", () => {
-    const { checkoutService } = createCheckoutStack();
+    const { checkoutService, cartService, store } = createCheckoutStack();
 
     expect(() => checkoutService.checkout("cust_1")).toThrow(AppError);
     try {
@@ -26,6 +26,9 @@ describe("CheckoutService", () => {
         code: ErrorCodes.EMPTY_CART,
       });
     }
+
+    expect(store.orders).toHaveLength(0);
+    expect(cartService.getCart("cust_1").items).toHaveLength(0);
   });
 
   it("checks out without coupon", () => {
@@ -43,7 +46,7 @@ describe("CheckoutService", () => {
   });
 
   it("rejects unknown coupon", () => {
-    const { cartService, checkoutService } = createCheckoutStack();
+    const { cartService, checkoutService, store } = createCheckoutStack();
     cartService.addItem("cust_1", "prod_1", 1);
 
     expect(() => checkoutService.checkout("cust_1", "SAVE10-UNKNOWN")).toThrow(AppError);
@@ -55,6 +58,9 @@ describe("CheckoutService", () => {
         code: ErrorCodes.UNKNOWN_DISCOUNT_CODE,
       });
     }
+
+    expect(store.orders).toHaveLength(0);
+    expect(cartService.getCart("cust_1").items).toHaveLength(1);
   });
 
   it("applies a valid coupon and prevents reuse", () => {
@@ -84,5 +90,8 @@ describe("CheckoutService", () => {
         code: ErrorCodes.DISCOUNT_CODE_USED,
       });
     }
+
+    expect(store.orders).toHaveLength(4);
+    expect(cartService.getCart("cust_1").items).toHaveLength(1);
   });
 });
